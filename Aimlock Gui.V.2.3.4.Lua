@@ -4,6 +4,8 @@ local SupportedGames = {
     "2788229376"
     }
 
+print("this person is using aimbot!!")
+
 Notify = function(title, text, icon, time)
     game:GetService("StarterGui"):SetCore("SendNotification",{
         Title = title;
