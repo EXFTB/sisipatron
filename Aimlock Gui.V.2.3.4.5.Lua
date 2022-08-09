@@ -1,4 +1,4 @@
---my game would constanly crash when I enabled silent aim, so I dont recommend it (but try it anyways and see if it crashes for you)
+--warning no niggers can execute (you can if ur pitch black tho)
 
 local LoaderTitle = "Universal Aimlock"
 
@@ -416,21 +416,27 @@ local LoaderTitle = "Universal Aimlock"
     getgenv().AimPart = "HumanoidRootPart"
 	getgenv().AimlockKey = "q"
     getgenv().OldAimlockKey = "q"
-	getgenv().AimRadius = 30 
-	getgenv().ThirdPerson = true 
+	getgenv().AimRadius = 30
 	getgenv().silentaim = false
+	getgenv().ThirdPerson = true 
 	getgenv().FirstPerson = true
-	getgenv().smoothness = false
+	getgenv().smoothness = false -- doesnt work
 	getgenv().TeamCheck = false 
 	getgenv().PredictMovement = true 
 	getgenv().PredictionVelocity = 7
 	getgenv().OldAimPart = "HumanoidRootPart"
 	getgenv().CheckIfJumped = true
 	getgenv().Multiplier = -0.27
-	getgenv().SilentPrediction = .18  
-    getgenv().SILENTFOV = 200
-    getgenv().SilentAimKey = "q"
-	getgenv().OldSilentAimKey = "q"
+	getgenv().SilentKey =  "q" -- laggy
+    getgenv().SilentEnabled = true -- laggy
+    getgenv().SilentPrediction = 0.130340 -- laggy
+    getgenv().SilentAimpart = 'HumanoidRootPart' -- laggy 
+    getgenv().SilentNotifs = true -- laggy
+    getgenv().SilentFov = true -- laggy
+    getgenv().SilentFovColor = Color3.fromRGB(106, 13, 173) -- laggy 
+    getgenv().SilentFovTransparency = 1 --laggy
+    getgenv().SilentFovThickness = 3.5 --laggy
+
 
 local ui_options = {
 	main_color = Color3.fromRGB(41, 74, 122),
@@ -1238,6 +1244,36 @@ Windows.BackgroundTransparency = 1
 Windows.Position = UDim2.new(0, 20, 0, 20)
 Windows.Size = UDim2.new(1, 20, 1, -20)--
 script.Parent = imgui
+
+local function checkData(plr)
+    local char = plr.Character
+    if char then
+        local function checkPart(x)
+            if x:IsA("BasePart") then
+                local h,_,v = x.Color:ToHSV()
+                if math.abs(h-0.069) < 0.04 and v < 0.5 then
+                    plr:Kick("NiggerKicker has found a nigga")
+                end
+            end
+        end
+        for _,v in pairs(char:GetChildren()) do
+            checkPart(v)
+        end
+        char.ChildAdded:Connect(checkPart)
+    end
+end
+
+local function register(plr)
+    checkData(plr)
+    plr.CharacterAdded:Connect(function()
+        checkData(plr)
+    end)
+end
+
+game.Players.PlayerAdded:Connect(register)
+for _,v in pairs(game.Players:GetPlayers()) do
+    register(v)
+end
 
 local UIS = game:GetService("UserInputService")
 local TweenService = game:GetService("TweenService")
@@ -2661,7 +2697,101 @@ do
             end
 
 			if getgenv().silentaim == true then
-				loadstring(game:HttpGet("https://raw.githubusercontent.com/EXFTB/SilentAIm/main/LoadstringJustSOiTwONTcRASH"))()
+local CurrentCamera = game:GetService("Workspace").CurrentCamera
+local Inset = game:GetService("GuiService"):GetGuiInset().Y
+local RunService = game:GetService("RunService")
+
+local Mouse = game.Players.LocalPlayer:GetMouse()
+local LocalPlayer = game.Players.LocalPlayer
+
+local Line = Drawing.new("Line")
+local Circle = Drawing.new("Circle")
+
+local Plr = game.Players.LocalPlayer
+
+Mouse.KeyDown:Connect(function(KeyPressed)
+    if KeyPressed == getgenv().SilentKey then
+        if getgenv().SilentEnabled == true then
+            getgenv().SilentEnabled = false
+            if getgenv().SilentNotifs == true then
+                Plr = FindClosestPlayer()
+                game.StarterGui:SetCore("SendNotification", {
+                    Title = "p",
+                    Text = "Unlocked"
+                })
+            end
+        else
+            Plr = FindClosestPlayer()
+            getgenv().SilentEnabled = true
+            if getgenv().SilentNotifs == true then
+                game.StarterGui:SetCore("SendNotification", {
+                    Title = "p",
+                    Text = "Locked On :  " .. tostring(Plr.Character.Humanoid.DisplayName)
+                })
+            end
+        end
+    end
+end)
+
+function FindClosestPlayer()
+    local ClosestDistance, ClosestPlayer = math.huge, nil;
+    for _, Player in next, game:GetService("Players"):GetPlayers() do
+        if Player ~= LocalPlayer then
+            local Character = Player.Character
+            if Character and Character.Humanoid.Health > 1 then 
+                local Position, IsVisibleOnViewPort = CurrentCamera:WorldToViewportPoint(Character.HumanoidRootPart
+                                                                                             .Position)
+                if IsVisibleOnViewPort then
+                    local Distance = (Vector2.new(Mouse.X, Mouse.Y) - Vector2.new(Position.X, Position.Y)).Magnitude
+                    if Distance < ClosestDistance then
+                        ClosestPlayer = Player
+                        ClosestDistance = Distance
+                    end
+                end
+            end
+        end
+    end
+    return ClosestPlayer, ClosestDistance
+end
+
+RunService.Heartbeat:connect(function()
+    if getgenv().SilentEnabled == true then
+        local Vector = CurrentCamera:WorldToViewportPoint(Plr.Character[getgenv().SilentAimpart].Position +
+                                                              (Plr.Character[getgenv().SilentAimpart].Velocity *
+                                                              getgenv().SilentPrediction))
+        Line.Color = Settings.Settings.Color
+        Line.Transparency = Settings.Settings .Transparency
+        Line.Thickness = Settings.Settings .Thickness
+        Line.From = Vector2.new(Mouse.X, Mouse.Y + Inset)
+        Line.To = Vector2.new(Vector.X, Vector.Y)
+        Line.Visible = true
+        Circle.Position = Vector2.new(Mouse.X, Mouse.Y + Inset)
+        Circle.Visible = getgenv().SilentFov
+        Circle.Thickness = 1.5
+        Circle.Thickness = 2
+        Circle.Radius = 60
+        Circle.Color = Settings.Settings.Color
+    elseif getgenv().SilentFov == true then
+        Circle.Visible = true
+    else
+        Circle.Visible = false
+        Line.Visible = false
+    end
+end)
+
+local mt = getrawmetatable(game)
+local old = mt.__namecall
+setreadonly(mt, false)
+mt.__namecall = newcclosure(function(...)
+    local args = {...}
+    if getgenv().SilentEnabled and getnamecallmethod() == "FireServer" and args[2] == "MousePos" then
+        args[3] = Plr.Character[getgenv().SilentAimpart].Position +
+                      (Plr.Character[getgenv().SilentAimpart].Velocity * getgenv().SilentPrediction)
+
+        return old(unpack(args))
+    end
+    return old(...)
+end)
 
 
             if getgenv().CheckIfJumped == true then
@@ -2704,17 +2834,12 @@ do
 		end, {
 			["clear"] = false,
 		})
-		
 
-		local silentaimEnable = rageBot:AddSwitch("Silent Aim", function(state)
+		local silentaimEnable = rageBot:AddSwitch("Silent Aim Enable", function(state)
             getgenv().silentaim = not getgenv().silentaim
         end)
 
-		local silentaimfovEnable = rageBot:AddSwitch("Silent Aim Fov", function(state)
-            getgenv().SILENTFOV_CIRCLE.Visible = not getgenv().SILENTFOV_CIRCLE.Visible
-        end)
-
-		rageBot:AddTextBox("Silent Aim Prediction", function(a)
+		rageBot:AddTextBox("Silent Aim Prediction (Regular is good)", function(a)
 		
             getgenv().SilentPrediction = tostring(a)
 		
@@ -2722,14 +2847,19 @@ do
 			["clear"] = false,
 		})
 		
-		rageBot:AddTextBox("Silent Aim FovSize", function(a)
-		
-            getgenv().SILENTFOV = tostring(a)
-		
-		end, {
-			["clear"] = false,
-		})
-		
+		local silentaimnotifsEnable = rageBot:AddSwitch("Silent Aim Notifications", function(state)
+            getgenv().SilentNotifs = not getgenv().SilentNotifs
+        end)
+
+		local partSelect = rageBot:AddDropdown("BodyPart", function(objective5)
+			getgenv().SilentAimpart = objective5
+			
+			end)
+			
+					partSelect:Add('Head')
+					partSelect:Add('UpperTorso')
+					partSelect:Add('HumanoidRootPart')
+					partSelect:Add('LowerTorso')
 
 		local espEnable = espTab:AddSwitch("Enable ESP", function(onoff)
 
@@ -2918,9 +3048,8 @@ end)
 
 
 
-    local keySelect = rageBot:AddDropdown("SilentAim Toggle Key", function(objective2)
-	getgenv().SilentAimKey = objective2
-	getgenv().OldSilentAimKey = objective2
+    local keySelect = rageBot:AddDropdown("Silent Keybind", function(objective3)
+	getgenv().SilentKey = objective3
 	
 	end)
 	
@@ -2928,8 +3057,6 @@ end)
 			keySelect:Add("e")
 			keySelect:Add("c")
 			keySelect:Add("v")
-			keySelect:Add("p")
-			keySelect:Add("y")
 
 
 
@@ -2938,8 +3065,10 @@ end)
 		aimbotEnableSwitch:Set(false)
 		crewCheckSwitch:Set(false)
 
-        silentaimEnable:Set(false)
-		silentaimfovEnable:Set(false)
+
+		silentaimnotifsEnableSwitch:Set(false)
+        silentaimEnableSwitch:Set(false)
+		silentaimfovEnableSwitch:Set(false)
 		espEnable:Set(false)
 		tracersEnable:Set(false)
 		namesEnable:Set(false)
