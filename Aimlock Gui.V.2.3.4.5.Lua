@@ -1,4 +1,4 @@
---my pc would constanly crash when I enabled silent aim, so I dont recommend it (but try it anyways and see if it crashes for you)
+--my game would constanly crash when I enabled silent aim, so I dont recommend it (but try it anyways and see if it crashes for you)
 
 local LoaderTitle = "Universal Aimlock"
 
